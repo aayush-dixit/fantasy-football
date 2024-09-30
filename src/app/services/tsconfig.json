@@ -22,10 +22,21 @@
     "strictPropertyInitialization": false,
     "typeRoots": [
       "./node_modules/@types"
-    ]
+    ],
+    "outDir": "./dist",
+    "rootDir": "./",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
   },
   "exclude": [
     "node_modules",
-    "cdk.out"
+    "cdk.out",
+    "dist",
+    "layer/nodejs/node_modules" // Exclude the layer's node_modules folder
+  ],
+  "include": [
+    "./lambdas/**/*.ts",
+    "./layer/nodejs/**/*.ts" // Include TypeScript files in the layer
   ]
 }
