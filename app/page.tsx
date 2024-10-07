@@ -32,8 +32,8 @@ const LeagueInfoPage = () => {
     }
 
     return (
-        <div className="text-center">
-            <h1 className='text-2xl py-2'> League Information Here</h1>
+        <div className="text-center flex flex-col h-screen items-center justify-center">
+            <h1 className='text-2xl mb-8'> To get started, enter in your Sleeper league ID below</h1>
             <input
                 type='text'
                 placeholder='Enter your sleeper league id here'
@@ -41,7 +41,7 @@ const LeagueInfoPage = () => {
                 onChange={(e) => {
                     setLeagueIdInput(e.target.value)
                 }}
-                className='border-2 border-black'
+                className='border-2 border-black w-1/3 h-[40px] rounded-lg mb-4 text-center'
             />
             {error &&
                 <div className='text-red'>
@@ -49,7 +49,7 @@ const LeagueInfoPage = () => {
                 </div>}
             {loading && <p>Loading...</p>}
             <div>
-                <Button className='bg-slate-200 py-2' onClick={fetchLeagueData}> Click here to fetch data </Button>
+                <Button className='bg-slate-500 border-2 border-black rounded py-2 text-white w-[200px]' onClick={fetchLeagueData}> Click here to fetch data </Button>
 
             </div>
 

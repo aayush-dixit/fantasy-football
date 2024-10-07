@@ -95,9 +95,9 @@ const TeamSelectPage = () => {
     
     return (
         <div className="text-center">
-            <h1 className="text-2xl">Select your team</h1>
+            <h1 className="text-2xl mb-12 mt-4">Select your team</h1>
             <div className="flex flex-col items-center">
-                {loading && <p>Loading...</p>}
+                {loading && <p>Fetching league rosters...</p>}
                 {leagueUsers && leagueUsers.map(user =>  (
                 <TeamDisplay user={user} key={user.user_id} className='py-2'/>
             ))}
