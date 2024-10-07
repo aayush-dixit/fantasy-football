@@ -33,10 +33,10 @@
     "node_modules",
     "cdk.out",
     "dist",
-    "layer/nodejs/node_modules" // Exclude the layer's node_modules folder
+    "layer/nodejs/node_modules"
   ],
   "include": [
     "./lambdas/**/*.ts",
-    "./layer/nodejs/**/*.ts" // Include TypeScript files in the layer
+    "./layer/nodejs/**/*.ts"
   ]
 }

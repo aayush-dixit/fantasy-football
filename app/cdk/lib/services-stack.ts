@@ -28,6 +28,16 @@ export class ServicesStack extends cdk.Stack {
         }
       });
 
+      const fetchUserDataLambda = new lambda.Function(this, 'FetchUserDataFunction', {
+        runtime: lambda.Runtime.NODEJS_20_X,
+        handler: 'lambdas/fetchLeagueUsers.handler',
+        code: lambda.Code.fromAsset(path.join(__dirname, '../dist')),
+        layers: [axiosLayer],
+        environment: {
+          API_GATEWAY_URL: process.env.API_GATEWAY_URL!,
+        }
+      });
+
       const fetchLeagueRostersLambda = new lambda.Function(this, 'FetchLeagueRostersFunction', {
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'lambdas/fetchLeagueRosters.handler',
@@ -50,6 +60,9 @@ export class ServicesStack extends cdk.Stack {
 
     const fetchLeagueRostersResource = apiGateway.root.addResource('fetchLeagueRosters');
     fetchLeagueRostersResource.addMethod('GET', new apigateway.LambdaIntegration(fetchLeagueRostersLambda));
+
+    const fetchLeagueUsersResource = apiGateway.root.addResource('fetchLeagueUser');
+    fetchLeagueUsersResource.addMethod('GET', new apigateway.LambdaIntegration(fetchUserDataLambda));
 
     const queryPlayerByIdResource = apiGateway.root.addResource('queryPlayerById');
     queryPlayerByIdResource.addMethod('GET', new apigateway.LambdaIntegration(queryPlayerByIdLambda));
