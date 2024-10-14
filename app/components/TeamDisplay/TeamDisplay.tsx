@@ -17,7 +17,7 @@ const TeamDisplay: React.FC<TeamDisplayProps> = ({ user, className }) => {
         router.push(`./league-roster?userId=${user.user_id}`);
     }
     return (
-        <div className={clsx('flex w-[350px] justify-between hover:bg-slate-100', className)} onClick={handleClick}>
+        <div className={clsx('flex w-[350px] justify-between hover:bg-slate-100 cursor-pointer', className)} onClick={handleClick}>
             <Image className="mr-4 rounded" src={`https://sleepercdn.com/avatars/thumbs/${user.avatar}`} alt="team img" width={50} height={50} />
 
             <p className="mt-2 text-xl">

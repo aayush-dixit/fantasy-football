@@ -4,6 +4,8 @@ import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { Construct } from 'constructs';
 import * as path from 'path';
 import * as dotenv from 'dotenv';
+import { Table } from 'aws-cdk-lib/aws-dynamodb';
+
 dotenv.config();
 
 export class ServicesStack extends cdk.Stack {
@@ -45,14 +47,25 @@ export class ServicesStack extends cdk.Stack {
         layers: [axiosLayer]
       })
 
+      const table = Table.fromTableName(this, 'ImportedTable', process.env.PLAYER_TABLE!);
+
+
       const queryPlayerByIdLambda = new lambda.Function(this, 'QueryPlayerByIdFunction', {
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'lambdas/queryPlayerById.handler',
         code: lambda.Code.fromAsset(path.join(__dirname, '../dist')),
-      })
+        layers: [axiosLayer],
+        environment: {
+          API_GATEWAY_URL: process.env.API_GATEWAY_URL!,
+          PLAYER_TABLE: table.tableName
+        }
+      });
+
+    table.grantReadData(queryPlayerByIdLambda);
+
 
     const apiGateway = new apigateway.RestApi(this, 'ApiGateway', {
-      restApiName: 'FantasyFootballApi'
+      restApiName: 'FantasyFootballApi',
     });
 
     const fetchLeagueDataResource = apiGateway.root.addResource('fetchLeagueData');

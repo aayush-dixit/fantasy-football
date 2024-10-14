@@ -1,40 +1,49 @@
-const AWS = require('aws-sdk');
-const dynamoDB = new AWS.DynamoDB.DocumentClient();
+
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
-  // Get the playerIds from query parameters and split them into an array
-  const playerIds = event.queryStringParameters?.playerIds;
+  const client = new DynamoDBClient({ region: "us-east-1" });
 
-  // Check if playerIds is provided and is an array of up to 20 player IDs
-  if (!playerIds) {
+  const response: APIGatewayProxyResult = {
+    statusCode: 200,
+    headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+    },
+    body: '',
+};
+  const playerId = event.queryStringParameters?.playerId;
+  if (!playerId) {
     return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'playerIds parameter is required' })
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Player id not provided' })
     };
-  }
-
-  const idsArray = playerIds.split(',').slice(0, 20); // Convert to array and limit to 20
-
-  // Prepare the batchGet parameters
-  const params = {
-    RequestItems: {
-      playerDatabase: {
-        Keys: idsArray.map(playerId => ( {playerId })) // Format for batchGet
-      }
-    }
   };
 
+    const command = new QueryCommand({
+      TableName: process.env.PLAYER_TABLE,
+      KeyConditionExpression: "playerId = :playerId",
+      ExpressionAttributeValues: {
+        ":playerId": { S: playerId },
+      },
+    });
+
+
   try {
-    const result = await dynamoDB.batchGet(params).promise();
-    return {
-      statusCode: 200,
-      body: JSON.stringify(result.Responses.playerDatabase) // Return the items retrieved
-    };
+    if (event.httpMethod === 'OPTIONS') {
+      response.statusCode = 200;
+      return response;
+  }
+    const data = await client.send(command);
+    response.body = JSON.stringify(data.Items);
+    return response;
   } catch (error) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: 'Could not retrieve player data' })
+      body: JSON.stringify({ error: 'Could not fetch data' }),
     };
   }
+
 };

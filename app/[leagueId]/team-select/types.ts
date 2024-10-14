@@ -41,3 +41,31 @@ export type User = {
     user_id: string;
     username: string;
 }
+
+export type Player = {
+    injury_status: string;
+    status: string;
+    team: string;
+    playerId: string;
+    full_name: string;
+    espn_id: string;
+    position: string;
+    age: string;
+    years_exp: string;
+}
+
+export type DynamoPlayer = {
+    injury_status: DyanmoString;
+    status: DyanmoString;
+    team: DyanmoString;
+    playerId: DyanmoString;
+    full_name: DyanmoString;
+    espn_id: DyanmoString;
+    position: DyanmoString;
+    age: DyanmoString;
+    years_exp: DyanmoString;
+}
+
+type DyanmoString = {
+    S: string;
+}

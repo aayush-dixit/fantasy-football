@@ -14,7 +14,6 @@ const TeamSelectPage = () => {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
-    const [leagueRoster, setLeagueRoster] = useState('');
     const [leagueOwners, setLeagueOwners] = useState<string[]>([]);
     const [leagueUsers, setLeagueUsers] = useState<User[]>([]);
 
@@ -42,7 +41,7 @@ const TeamSelectPage = () => {
             }
             setError(false);
             setLoading(false);
-            setLeagueRoster(JSON.stringify(rawRes.data));
+            localStorage.setItem('leagueRosters', JSON.stringify(rawRes.data));
             const owners = rawRes.data.map((team: Team) => team.owner_id);
             setLeagueOwners(owners);
         } catch (err) {
@@ -73,7 +72,7 @@ const TeamSelectPage = () => {
         } catch (err) {
             console.error('Error fetching league users:', err);
             setError(true);
-            setLoading(false); // Ensure loading is set to false on error
+            setLoading(false);
         }
     };
 
