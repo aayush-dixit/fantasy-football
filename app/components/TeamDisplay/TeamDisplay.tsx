@@ -1,5 +1,5 @@
 import React from "react";
-import { User } from "../../[leagueId]/team-select/types";
+import { User } from "../../types/types";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import clsx from 'clsx';

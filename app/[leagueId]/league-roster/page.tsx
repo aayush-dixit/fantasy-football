@@ -1,12 +1,12 @@
 "use client";
 
-import React, { startTransition, useEffect } from "react";
+import React, { useEffect } from "react";
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import axios from 'axios';
-import { DynamoPlayer, Player, Team } from "../team-select/types";
+import { DynamoPlayer, Player, Team } from "../../types/types";
 import RosterDisplay from "../../components/RosterDisplay/RosterDisplay";
-
+import { useStore } from "../../store/useStore";
+import { fetchPlayerById } from "../../server-actions/fetchPlayerById";
 const LeagueRosterPage = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -16,37 +16,30 @@ const LeagueRosterPage = () => {
     const [allPlayers, setAllPlayers] = useState<Player[]>([]);
 
     const userId = searchParams.get('userId');
-    const leagueRoster = localStorage.getItem('leagueRosters');
-
-    if (!leagueRoster) {
+    
+    const { leagueRosters } = useStore();
+    if (!leagueRosters) {
         router.push('/');
         return;
     }
 
-    const rosters = JSON.parse(leagueRoster);
-    const userTeam: Team = rosters.find((team: Team) => team.owner_id === userId);
-    const players = userTeam.players;
-
-    const fetchPlayer = async (playerId: string) => {
-        try {
-            const rawRes = await axios.get(`${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/queryPlayerById?playerId=${playerId}`);
-            if (rawRes.status != 200) {
-                throw new Error('Failed to fetch league data');
-            }
-            return rawRes.data;
-
-        } catch (err) {
-            console.error(err);
-            return null;
-        }
+    const userTeam: Team | undefined = leagueRosters.find((team: Team) => team.owner_id === userId);
+    if (!userTeam) {
+        router.push('/');
+        return;
     }
+    const players = userTeam.players;
 
     useEffect(() => {
         const getLeagueInfo = async () => {
             setLoading(true);
             for (const player of players) {
-                const playerData = await fetchPlayer(player);
-                const jsonResponse: [Player] = playerData.map((item: DynamoPlayer) => {
+                const playerData = await fetchPlayerById(player);
+                if (!playerData.success) {
+                    throw new Error('Failed to fetch player data');
+                }
+                const data = JSON.parse(JSON.stringify(playerData.data));
+                const jsonResponse: [Player] = data.map((item: DynamoPlayer) => {
                     return {
                         injury_status: item.injury_status.S,
                         status: item.status.S,

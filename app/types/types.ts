@@ -69,3 +69,9 @@ export type DynamoPlayer = {
 type DyanmoString = {
     S: string;
 }
+
+export type LeagueSettings = {
+    name: string;
+    league_id: string;
+    roster_positions: string[]
+}

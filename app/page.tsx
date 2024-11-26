@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Button from './components/Button/FetchButton';
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
+import { useStore } from './store/useStore';
+import { fetchLeagueData } from './server-actions/fetchLeagueData';
 
 const LeagueInfoPage = () => {
     const router = useRouter();
@@ -12,22 +13,19 @@ const LeagueInfoPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
     const [leagueIdInput, setLeagueIdInput] = useState('');
+    const {setLeagueData} = useStore();
 
-    const fetchLeagueData = async () => {
+    const handleClick = async() => {
         setLoading(true);
-        try {
-            const rawRes = await axios.get(`${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/fetchLeagueData?leagueIdInput=${leagueIdInput}`);
-            if (rawRes.status != 200) {
-                throw new Error('Failed to fetch league data');
-            }
+        const response = await fetchLeagueData(leagueIdInput);
+        if (response.success) {
+            setLeagueData(response.data);
+            setLoading(false);
             setError(false);
-            setLoading(false);
-            localStorage.setItem('leagueData', JSON.stringify(rawRes.data));
             router.push(`./${leagueIdInput}/team-select`);
-        } catch (err) {
+        } else {
+            setError(true)
             setLoading(false);
-            setError(true);
-            console.error(err);
         }
     }
 
@@ -49,7 +47,7 @@ const LeagueInfoPage = () => {
                 </div>}
             {loading && <p>Loading...</p>}
             <div>
-                <Button className='bg-slate-500 border-2 border-black rounded py-2 text-white w-[200px]' onClick={fetchLeagueData}> Click here to fetch data </Button>
+                <Button className='bg-slate-500 border-2 border-black rounded py-2 text-white w-[200px]' onClick={handleClick}> Click here to fetch data </Button>
 
             </div>
 

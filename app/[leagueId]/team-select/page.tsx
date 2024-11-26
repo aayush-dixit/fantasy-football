@@ -1,12 +1,13 @@
 "use client";
 
-import React, { useEffect } from "react";
-import Button from '../../components/Button/FetchButton';
+import React, { useEffect, Suspense } from "react";
 import { useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { Team, User } from "./types";
-import axios from 'axios';
+import { Team, User } from "../../types/types";
 import TeamDisplay from "../../components/TeamDisplay/TeamDisplay";
+import { useStore } from "../../store/useStore";
+import { fetchLeagueUser } from "../../server-actions/fetchLeagueUser";
+import { fetchLeagueRosters } from "../../server-actions/fetchLeagueRosters";
 
 const TeamSelectPage = () => {
     const router = useRouter();
@@ -14,36 +15,29 @@ const TeamSelectPage = () => {
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
-    const [leagueOwners, setLeagueOwners] = useState<string[]>([]);
-    const [leagueUsers, setLeagueUsers] = useState<User[]>([]);
+    const { setLeagueRosters, setLeagueUsers, leagueUsers } = useStore();
 
     const leagueIdInput = pathName.split('/')[1];
 
-    useEffect(() => {
-        const storedUsers = localStorage.getItem('leagueUsers');
-        if (storedUsers) {
-            setLeagueUsers(JSON.parse(storedUsers));
-        }
-    }, []);
-    
     if (!leagueIdInput) {
         router.push('/');
         return;
     }
-    
-    
-    const fetchLeagueRoster = async() => {
+
+
+    const fetchLeagueRoster = async () => {
         setLoading(true);
         try {
-            const rawRes = await axios.get(`${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/fetchLeagueRosters?leagueIdInput=${leagueIdInput}`);
-            if (rawRes.status != 200) {
+            const rosters = await fetchLeagueRosters(leagueIdInput);
+            if (!rosters.success) {
                 throw new Error('Failed to fetch league data');
             }
+            const owners = rosters.data.map((team: Team) => team.owner_id);
+
             setError(false);
             setLoading(false);
-            localStorage.setItem('leagueRosters', JSON.stringify(rawRes.data));
-            const owners = rawRes.data.map((team: Team) => team.owner_id);
-            setLeagueOwners(owners);
+            setLeagueRosters(rosters.data);
+            await fetchLeagueUsers(owners)
         } catch (err) {
             setLoading(false);
             setError(true);
@@ -54,21 +48,18 @@ const TeamSelectPage = () => {
     const fetchLeagueUsers = async (teams: string[]) => {
         setLoading(true);
         try {
-            const results: User[] = [];
-            
-            for (const team of teams) {
-                const rawRes = await axios.get(`${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/fetchLeagueUser?userId=${team}`);
-                if (rawRes.status !== 200) {
-                    throw new Error('Failed to fetch league data for user: ' + team);
-                }
-                results.push(rawRes.data);
-            }
-    
+            const results: User[] = await Promise.all(
+                teams.map(async (userId) => {
+                    const user = await fetchLeagueUser(userId);
+                    if (!user.success) {
+                        throw new Error(`Failed to fetch league data for user: ${userId}`);
+                    }
+                    return user.data;
+                })
+            )
             setLeagueUsers(results);
-            localStorage.setItem('leagueUsers', JSON.stringify(results))
             setLoading(false);
             setError(false);
-            
         } catch (err) {
             console.error('Error fetching league users:', err);
             setError(true);
@@ -77,29 +68,24 @@ const TeamSelectPage = () => {
     };
 
     useEffect(() => {
-        const getUsers = async() => {
-            await fetchLeagueUsers(leagueOwners);
-        };
-        getUsers();
-    }, [leagueOwners, setLeagueOwners]);
-
-    useEffect(() => {
-        const getLeagueInfo = async() => {
+        const getLeagueInfo = async () => {
             await fetchLeagueRoster();
         };
-        getLeagueInfo();
+        if (!leagueUsers) {
+            getLeagueInfo();
+        }
     }, []);
 
 
-    
+
     return (
         <div className="text-center">
             <h1 className="text-2xl mb-12 mt-4">Select your team</h1>
             <div className="flex flex-col items-center">
                 {loading && <p>Fetching league rosters...</p>}
-                {leagueUsers && leagueUsers.map(user =>  (
-                <TeamDisplay user={user} key={user.user_id} className='py-2'/>
-            ))}
+                {leagueUsers && leagueUsers.map(user => (
+                    <TeamDisplay user={user} key={user.user_id} className='py-2' />
+                ))}
             </div>
 
         </div>

@@ -13,7 +13,7 @@ export async function getAIRecommendation(prompt: string) {
             max_tokens: 1024,
             messages: [{ role: "user", content: prompt }],
         });
-        const res = response.content;
+        const res = (response.content[0] as Anthropic.TextBlock).text;
         return res;
     } catch (error) {
         console.error('Error with Claude:', error);
