@@ -5,7 +5,7 @@ export default function RecommendationModal() {
 
         return (
           <div className="bg-slate-500 w-full h-12 z-10">
-            This is th emodal
+            This is the modal
           </div>
         );
       }
