@@ -7,6 +7,11 @@ import { DynamoPlayer, Player, Team } from "../../types/types";
 import RosterDisplay from "../../components/RosterDisplay/RosterDisplay";
 import { useStore } from "../../store/useStore";
 import { fetchPlayerById } from "../../server-actions/fetchPlayerById";
+import { mapLeaguePlayers, filteredPlayer } from "../../server-actions/mapLeaguePlayers";
+import { anthropicOrchestrator } from "../../utils/anthropicOrchestrator";
+import { Button, Modal } from "@mantine/core";
+import { useDisclosure } from "@mantine/hooks";
+
 const LeagueRosterPage = () => {
     const searchParams = useSearchParams();
     const router = useRouter();
@@ -14,9 +19,11 @@ const LeagueRosterPage = () => {
     const [loading, setLoading] = useState(false);
     const [playerInfoLoaded, setPlayerInfoLoaded] = useState(false);
     const [allPlayers, setAllPlayers] = useState<Player[]>([]);
-
+    const [opened, { open, close }] = useDisclosure(false);
+    const [recommendation, setRecommendation] = useState<string>('');
+    const [recLoading, setRecLoading] = useState(false);
     const userId = searchParams.get('userId');
-    
+
     const { leagueRosters } = useStore();
     if (!leagueRosters) {
         router.push('/');
@@ -29,7 +36,7 @@ const LeagueRosterPage = () => {
         return;
     }
     const players = userTeam.players;
-
+    let playersMap: Record<string, filteredPlayer[]> = {};
     useEffect(() => {
         const getLeagueInfo = async () => {
             setLoading(true);
@@ -63,12 +70,32 @@ const LeagueRosterPage = () => {
         getLeagueInfo();
     }, []);
 
+    async function getRecommendation() {
+        if (!leagueRosters) {
+            return null;
+        }
+        setRecLoading(true)
+        playersMap = await mapLeaguePlayers(leagueRosters);
+        const userTeam = Object.fromEntries(Object.entries(playersMap).filter(([user]) => user === userId));
+        const filteredMap = Object.fromEntries(Object.entries(playersMap).filter(([user]) => user !== userId));
+        const recommendation = await anthropicOrchestrator(userTeam, filteredMap);
+        setRecommendation(recommendation);
+        open();
+        setRecLoading(false);
+    }
+
     return (
         <div className="text-center">
             {loading && <div> Loading player information... </div>}
             {playerInfoLoaded &&
                 <RosterDisplay players={allPlayers} />
             }
+            {playerInfoLoaded && !recLoading && <Button variant="filled" onClick={getRecommendation}>Get AI Recommendation</Button>
+            }
+            <Modal opened={opened} onClose={close} title="What we recommend: ">
+                {recommendation}
+            </Modal>
+
 
         </div>
     )
