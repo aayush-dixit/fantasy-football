@@ -19,7 +19,7 @@ export async function mapLeaguePlayers(leagueRosters: Team[]): Promise<Record<st
         const playersList = team.players;
         for (const player of playersList) {
             const fetchedPlayer = await fetchPlayerById(player);
-            if (fetchedPlayer.success && fetchedPlayer.data[0]) {
+            if (fetchedPlayer.success && Array.isArray(fetchedPlayer.data)) {
                 players.push({
                     name: fetchedPlayer.data[0].full_name.S,
                     age: fetchedPlayer.data[0].age.S,
