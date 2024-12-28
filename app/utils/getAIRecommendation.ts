@@ -65,9 +65,7 @@ export async function getAIRecommendation(
     );
     allRecs.push(rec);
   }
-  console.log('done with chunking');
   const finalRec = await callAnthropic(aggregateTradePrompt(allRecs));
-  console.log(finalRec);
   return finalRec;
 }
 
