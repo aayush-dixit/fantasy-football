@@ -59,13 +59,13 @@ export async function getAIRecommendation(
     4096 - JSON.stringify(combinedUserTeam).length - samplePrompt.length
   );
   const allRecs: string[] = [];
-  const requests = chunks.map(async (chunk) => {
-    const rec = await callAnthropic(tradeRecommendationPrompt(combinedUserTeam, chunk));
-    console.log(rec);
+  for (const chunk of chunks) {
+    const rec = await callAnthropic(
+      tradeRecommendationPrompt(combinedUserTeam, chunk)
+    );
     allRecs.push(rec);
-  });
-  await Promise.all(requests);
-
+  }
+  console.log('done with chunking');
   const finalRec = await callAnthropic(aggregateTradePrompt(allRecs));
   console.log(finalRec);
   return finalRec;
