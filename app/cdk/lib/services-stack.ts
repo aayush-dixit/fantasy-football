@@ -19,66 +19,99 @@ export class ServicesStack extends cdk.Stack {
       description: 'A layer that contains axios dependency',
     });
 
-      // Create Lambda functions
-      const fetchLeagueDataLambda = new lambda.Function(this, 'FetchLeagueDataFunction', {
+    // Create Lambda functions
+    const fetchLeagueDataLambda = new lambda.Function(
+      this,
+      'FetchLeagueDataFunction',
+      {
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'lambdas/fetchLeagueData.handler',
         code: lambda.Code.fromAsset(path.join(__dirname, '../dist')),
         layers: [axiosLayer],
         environment: {
           API_GATEWAY_URL: process.env.API_GATEWAY_URL!,
-        }
-      });
+        },
+      }
+    );
 
-      const fetchUserDataLambda = new lambda.Function(this, 'FetchUserDataFunction', {
+    const fetchUserDataLambda = new lambda.Function(
+      this,
+      'FetchUserDataFunction',
+      {
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'lambdas/fetchLeagueUsers.handler',
         code: lambda.Code.fromAsset(path.join(__dirname, '../dist')),
         layers: [axiosLayer],
         environment: {
           API_GATEWAY_URL: process.env.API_GATEWAY_URL!,
-        }
-      });
+        },
+      }
+    );
 
-      const fetchLeagueRostersLambda = new lambda.Function(this, 'FetchLeagueRostersFunction', {
+    const fetchLeagueRostersLambda = new lambda.Function(
+      this,
+      'FetchLeagueRostersFunction',
+      {
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'lambdas/fetchLeagueRosters.handler',
         code: lambda.Code.fromAsset(path.join(__dirname, '../dist')),
-        layers: [axiosLayer]
-      })
+        layers: [axiosLayer],
+      }
+    );
 
-      const table = Table.fromTableName(this, 'ImportedTable', process.env.PLAYER_TABLE!);
+    const table = Table.fromTableName(
+      this,
+      'ImportedTable',
+      process.env.PLAYER_TABLE!
+    );
 
-
-      const queryPlayerByIdLambda = new lambda.Function(this, 'QueryPlayerByIdFunction', {
+    const queryPlayerByIdLambda = new lambda.Function(
+      this,
+      'QueryPlayerByIdFunction',
+      {
         runtime: lambda.Runtime.NODEJS_20_X,
         handler: 'lambdas/queryPlayerById.handler',
         code: lambda.Code.fromAsset(path.join(__dirname, '../dist')),
         layers: [axiosLayer],
         environment: {
           API_GATEWAY_URL: process.env.API_GATEWAY_URL!,
-          PLAYER_TABLE: table.tableName
-        }
-      });
+          PLAYER_TABLE: table.tableName,
+        },
+      }
+    );
 
     table.grantReadData(queryPlayerByIdLambda);
-
 
     const apiGateway = new apigateway.RestApi(this, 'ApiGateway', {
       restApiName: 'FantasyFootballApi',
     });
 
-    const fetchLeagueDataResource = apiGateway.root.addResource('fetchLeagueData');
-    fetchLeagueDataResource.addMethod('GET', new apigateway.LambdaIntegration(fetchLeagueDataLambda));
+    const fetchLeagueDataResource =
+      apiGateway.root.addResource('fetchLeagueData');
+    fetchLeagueDataResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(fetchLeagueDataLambda)
+    );
 
-    const fetchLeagueRostersResource = apiGateway.root.addResource('fetchLeagueRosters');
-    fetchLeagueRostersResource.addMethod('GET', new apigateway.LambdaIntegration(fetchLeagueRostersLambda));
+    const fetchLeagueRostersResource =
+      apiGateway.root.addResource('fetchLeagueRosters');
+    fetchLeagueRostersResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(fetchLeagueRostersLambda)
+    );
 
-    const fetchLeagueUsersResource = apiGateway.root.addResource('fetchLeagueUser');
-    fetchLeagueUsersResource.addMethod('GET', new apigateway.LambdaIntegration(fetchUserDataLambda));
+    const fetchLeagueUsersResource =
+      apiGateway.root.addResource('fetchLeagueUser');
+    fetchLeagueUsersResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(fetchUserDataLambda)
+    );
 
-    const queryPlayerByIdResource = apiGateway.root.addResource('queryPlayerById');
-    queryPlayerByIdResource.addMethod('GET', new apigateway.LambdaIntegration(queryPlayerByIdLambda));
-
+    const queryPlayerByIdResource =
+      apiGateway.root.addResource('queryPlayerById');
+    queryPlayerByIdResource.addMethod(
+      'GET',
+      new apigateway.LambdaIntegration(queryPlayerByIdLambda)
+    );
   }
 }
