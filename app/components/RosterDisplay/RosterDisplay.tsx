@@ -24,7 +24,7 @@ const RosterDisplay: React.FC<RosterDisplayProps> = ({ players }) => {
   }
 
   return (
-    <div>
+    <div className='h-[1000px] overflow-y-scroll'>
       <h1 className="text-2xl font-bold">Your Roster</h1>
       <div className="grid grid-cols-5 gap-4 mt-8">
         <div>

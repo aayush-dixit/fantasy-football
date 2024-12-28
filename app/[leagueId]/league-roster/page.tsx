@@ -16,7 +16,7 @@ import {
   mapLeaguePlayers,
   filteredPlayer,
 } from '../../server-actions/mapLeaguePlayers';
-import { anthropicOrchestrator } from '../../utils/anthropicOrchestrator';
+import { getAIRecommendation } from '../../utils/getAIRecommendation';
 import { Button, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import RecommendationModal from '../../components/Modal/RecommendationModal';
@@ -99,7 +99,7 @@ const LeagueRosterPage = () => {
     const filteredMap = Object.fromEntries(
       Object.entries(playersMap).filter(([user]) => user !== userId)
     );
-    const recommendation = await anthropicOrchestrator(userTeam, filteredMap);
+    const recommendation = await getAIRecommendation(userTeam, filteredMap);
     setRecommendation(recommendation);
     open();
     setRecLoading(false);

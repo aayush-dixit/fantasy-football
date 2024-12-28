@@ -2,78 +2,16 @@ import { filteredPlayer } from '../server-actions/mapLeaguePlayers';
 import { callAnthropic } from '../server-actions/callAnthropic';
 import { FantasyCalcPlayer } from '../types/types';
 import { getPlayerStatistics } from '../server-actions/getPlayerStatistics';
+import { tradeRecommendationPrompt } from './prompts/tradeRecommendationPrompt';
+import { aggregateTradePrompt } from './prompts/aggregateTradePrompt';
+
 type CombinedPlayer = filteredPlayer & FantasyCalcPlayer;
 
-function generateRecPrompt<T>(
-  userTeam: Record<string, filteredPlayer[]>,
-  chunk: Record<string, T>
-) {
-  return `For each team here, please recommend a trade with up to 3 players on each side that would make sense for this user's team. Only return trades if a trade can be made where the difference between the value on the user sides and the other team of the trade is less than 500: ${JSON.stringify(userTeam)}. Other teams: ${JSON.stringify(chunk)}. In the response only return the following JSON object:
-  {
-    "userTeam": {
-      "sends": [
-        {
-        "playerName": [playerName],
-        "position": [position],
-        "value": [value],
-        "playerId": [playerId],
-      }, ...
-      ]
-    },
-    "otherTeam": {
-      "teamId": [id],
-      "sends": [
-        {
-        "playerName": [playerName],
-        "position": [position],
-        "value": [value],
-        "playerId": [playerId],
-      }, ...
-      ]
-    },
-  }  
-  `;
-}
-
-function generateFinalRecPrompt(allRecs: string[]) {
-  return `Out of all these trade recommendations: ${JSON.stringify(allRecs)}, pick the 3 with the lowest value differences between the user and other team and provide a rationale as to why this trade would make sense for both teams without mentioning the numerical values assigned to each player. Return the response in the following JSON format: 
-  {"suggestions":
-    [
-      {
-        "userTeam": {
-          "sends": [
-            {
-            "playerName": [playerName],
-            "position": [position],
-            "value": [value],
-            "playerId": [playerId],
-          }, ...
-          ],
-        },
-        "otherTeam": {
-          "teamId": [id],
-          "sends": [
-            {
-            "playerName": [playerName],
-            "position": [position],
-            "value": [value],
-            "playerId": [playerId],
-          }, ...
-          ],
-      },
-      "rationale": [rationale],
-    },
-      ...
-    ]
-  }
-}   `;
-}
-
-export async function anthropicOrchestrator(
+export async function getAIRecommendation(
   userTeam: Record<string, filteredPlayer[]>,
   otherTeams: Record<string, filteredPlayer[]>
 ) {
-  const samplePrompt = generateRecPrompt({}, {});
+  const samplePrompt = tradeRecommendationPrompt({}, {});
   const playerStatistics = await getPlayerStatistics();
   if (!playerStatistics.success) {
     return null;
@@ -122,12 +60,14 @@ export async function anthropicOrchestrator(
   );
   const allRecs: string[] = [];
   const requests = chunks.map(async (chunk) => {
-    const rec = await callAnthropic(generateRecPrompt(combinedUserTeam, chunk));
+    const rec = await callAnthropic(tradeRecommendationPrompt(combinedUserTeam, chunk));
+    console.log(rec);
     allRecs.push(rec);
   });
   await Promise.all(requests);
 
-  const finalRec = await callAnthropic(generateFinalRecPrompt(allRecs));
+  const finalRec = await callAnthropic(aggregateTradePrompt(allRecs));
+  console.log(finalRec);
   return finalRec;
 }
 
