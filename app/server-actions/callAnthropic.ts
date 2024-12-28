@@ -4,7 +4,7 @@ import Anthropic from '@anthropic-ai/sdk';
 
 export async function callAnthropic(prompt: string) {
     const client = new Anthropic({
-        apiKey: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY!,
+        apiKey: process.env.ANTHROPIC_API_KEY!,
     });
 
     try {
