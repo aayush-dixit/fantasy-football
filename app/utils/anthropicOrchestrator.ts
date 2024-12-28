@@ -16,6 +16,7 @@ function generateRecPrompt<T>(
         "playerName": [playerName],
         "position": [position],
         "value": [value],
+        "playerId": [playerId],
       }, ...
       ]
     },
@@ -26,6 +27,7 @@ function generateRecPrompt<T>(
         "playerName": [playerName],
         "position": [position],
         "value": [value],
+        "playerId": [playerId],
       }, ...
       ]
     },
@@ -34,7 +36,7 @@ function generateRecPrompt<T>(
 }
 
 function generateFinalRecPrompt(allRecs: string[]) {
-  return `Out of all these trade recommendations: ${JSON.stringify(allRecs)}, pick the 3 with the lowest value differences between the user and other team. Return the response in the following JSON format: 
+  return `Out of all these trade recommendations: ${JSON.stringify(allRecs)}, pick the 3 with the lowest value differences between the user and other team and provide a rationale as to why this trade would make sense for both teams without mentioning the numerical values assigned to each player. Return the response in the following JSON format: 
   {"suggestions":
     [
       {
@@ -44,9 +46,9 @@ function generateFinalRecPrompt(allRecs: string[]) {
             "playerName": [playerName],
             "position": [position],
             "value": [value],
+            "playerId": [playerId],
           }, ...
           ],
-          "rationale": [rationale]
         },
         "otherTeam": {
           "teamId": [id],
@@ -55,10 +57,13 @@ function generateFinalRecPrompt(allRecs: string[]) {
             "playerName": [playerName],
             "position": [position],
             "value": [value],
+            "playerId": [playerId],
           }, ...
           ],
-          "rationale": [rationale]
-      },...
+      },
+      "rationale": [rationale],
+    },
+      ...
     ]
   }
 }   `;
@@ -116,11 +121,11 @@ export async function anthropicOrchestrator(
     4096 - JSON.stringify(combinedUserTeam).length - samplePrompt.length
   );
   const allRecs: string[] = [];
-  for (const chunk of chunks) {
+  const requests = chunks.map(async (chunk) => {
     const rec = await callAnthropic(generateRecPrompt(combinedUserTeam, chunk));
-    console.log(rec);
     allRecs.push(rec);
-  }
+  });
+  await Promise.all(requests);
 
   const finalRec = await callAnthropic(generateFinalRecPrompt(allRecs));
   return finalRec;

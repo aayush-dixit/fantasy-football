@@ -85,3 +85,30 @@ export type FantasyCalcPlayer = {
   positionRank: string;
   redraftValue: string;
 };
+
+type ClaudeUserTeam = {
+  sends: {
+    playerName: string;
+    position: string;
+    value: string;
+    playerId: string;
+  }[];
+};
+
+export type ClaudeOtherTeam = {
+  teamId: string;
+  sends: {
+    playerName: string;
+    position: string;
+    value: string;
+    playerId: string;
+  }[];
+};
+
+export type ClaudeRecommendation = {
+  suggestions: {
+    userTeam: ClaudeUserTeam;
+    otherTeam: ClaudeOtherTeam;
+    rationale: string;
+  }[];
+} | null;

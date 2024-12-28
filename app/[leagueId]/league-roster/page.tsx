@@ -1,9 +1,14 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { Suspense, useEffect } from 'react';
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { DynamoPlayer, Player, Team } from '../../types/types';
+import {
+  ClaudeRecommendation,
+  DynamoPlayer,
+  Player,
+  Team,
+} from '../../types/types';
 import RosterDisplay from '../../components/RosterDisplay/RosterDisplay';
 import { useStore } from '../../store/useStore';
 import { fetchPlayerById } from '../../server-actions/fetchPlayerById';
@@ -14,6 +19,8 @@ import {
 import { anthropicOrchestrator } from '../../utils/anthropicOrchestrator';
 import { Button, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import RecommendationModal from '../../components/Modal/RecommendationModal';
+import Loading from '../loading';
 
 const LeagueRosterPage = () => {
   const searchParams = useSearchParams();
@@ -25,6 +32,7 @@ const LeagueRosterPage = () => {
   const [opened, { open, close }] = useDisclosure(false);
   const [recommendation, setRecommendation] = useState<string | null>('');
   const [recLoading, setRecLoading] = useState(false);
+
   const userId = searchParams.get('userId');
 
   const { leagueRosters } = useStore();
@@ -98,18 +106,35 @@ const LeagueRosterPage = () => {
   }
 
   return (
-    <div className="text-center">
-      {loading && <div> Loading player information... </div>}
-      {playerInfoLoaded && <RosterDisplay players={allPlayers} />}
-      {playerInfoLoaded && !recLoading && (
-        <Button variant="filled" onClick={getRecommendation}>
-          Get AI Recommendation
-        </Button>
+    <Suspense fallback={<Loading />}>
+      {!recLoading && (
+        <div className="text-center">
+          {loading && <div> Loading player information... </div>}
+          {playerInfoLoaded && <RosterDisplay players={allPlayers} />}
+          {playerInfoLoaded && !recLoading && (
+            <Button
+              variant="filled"
+              color="dark"
+              onClick={getRecommendation}
+              size="xl"
+            >
+              Recommend Me Trades
+            </Button>
+          )}
+        </div>
       )}
-      <Modal opened={opened} onClose={close} title="What we recommend: ">
-        {recommendation}
-      </Modal>
-    </div>
+
+      {recLoading && <Loading />}
+
+      {recommendation && (
+        <RecommendationModal
+          opened={opened}
+          onClose={close}
+          title="Recommended trades: "
+          recommendation={JSON.parse(recommendation)}
+        />
+      )}
+    </Suspense>
   );
 };
 
