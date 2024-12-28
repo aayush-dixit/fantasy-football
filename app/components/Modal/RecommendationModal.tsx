@@ -35,7 +35,7 @@ const RecommendationModal: React.FC<RecommendationModalProps> = ({
                       height={150}
                     />
                     <p className="text-lg">
-                      {player.playerName} - {player.position} - {player.value}
+                      {player.playerName} - {player.position}
                     </p>
                   </div>
                 ))}
@@ -52,7 +52,7 @@ const RecommendationModal: React.FC<RecommendationModalProps> = ({
                       height={150}
                     />
                     <p className="text-lg">
-                      {player.playerName} - {player.position} - {player.value}
+                      {player.playerName} - {player.position}
                     </p>
                   </div>
                 ))}
