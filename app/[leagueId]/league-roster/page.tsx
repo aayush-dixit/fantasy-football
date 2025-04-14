@@ -17,7 +17,7 @@ import {
   filteredPlayer,
 } from '../../server-actions/mapLeaguePlayers';
 import { getAIRecommendation } from '../../utils/getAIRecommendation';
-import { Button, Modal } from '@mantine/core';
+import { Button } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import RecommendationModal from '../../components/Modal/RecommendationModal';
 import Loading from '../loading';
@@ -59,7 +59,7 @@ const LeagueRosterPage = () => {
   let playersMap: Record<string, filteredPlayer[]> = {};
   useEffect(() => {
     const getLeagueInfo = async () => {
-      if (!allPlayers) {
+      if (allPlayers.length == 0) {
         setLoading(true);
         const playerPromises = players.map(
           async (player) => await fetchPlayerById(player)
