@@ -1,6 +1,6 @@
 'use client';
 
-import React, { Suspense, useEffect } from 'react';
+import React, { Suspense, useEffect, useMemo } from 'react';
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
@@ -21,6 +21,7 @@ import { Button, Modal } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import RecommendationModal from '../../components/Modal/RecommendationModal';
 import Loading from '../loading';
+import BackButton from '../../components/Button/BackButton';
 
 const LeagueRosterPage = () => {
   const searchParams = useSearchParams();
@@ -36,56 +37,65 @@ const LeagueRosterPage = () => {
   const userId = searchParams.get('userId');
 
   const { leagueRosters } = useStore();
-  if (!leagueRosters) {
-    router.push('/');
-    return;
-  }
+  useEffect(() => {
+    if (!leagueRosters) {
+      router.push('/');
+      return;
+    }
+  }, []);
 
-  const userTeam: Team | undefined = leagueRosters.find(
+  const userTeam: Team | undefined = leagueRosters?.find(
     (team: Team) => team.owner_id === userId
   );
-  if (!userTeam) {
-    router.push('/');
-    return;
-  }
-  const players = userTeam.players;
+
+  useEffect(() => {
+    if (!userTeam) {
+      router.push('/');
+      return;
+    }
+  }, []);
+
+  const players = userTeam?.players || [];
   let playersMap: Record<string, filteredPlayer[]> = {};
   useEffect(() => {
     const getLeagueInfo = async () => {
-      setLoading(true);
-      const playerPromises = players.map(
-        async (player) => await fetchPlayerById(player)
-      );
-      const fetchedPlayers = await Promise.all(playerPromises);
+      if (!allPlayers) {
+        setLoading(true);
+        const playerPromises = players.map(
+          async (player) => await fetchPlayerById(player)
+        );
+        const fetchedPlayers = await Promise.all(playerPromises);
 
-      for (const player of fetchedPlayers) {
-        if (!player.success) {
-          throw new Error('Failed to fetch player data');
+        for (const player of fetchedPlayers) {
+          if (!player.success) {
+            throw new Error('Failed to fetch player data');
+          }
+          const data = JSON.parse(JSON.stringify(player.data));
+          const jsonResponse: [Player] = data.map((item: DynamoPlayer) => {
+            return {
+              injury_status: item.injury_status.S,
+              status: item.status.S,
+              team: item.team.S,
+              playerId: item.playerId.S,
+              full_name: item.full_name.S,
+              espn_id: item.espn_id.S,
+              years_exp: item.years_exp.S,
+              position: item.position.S,
+              age: item.age.S,
+            };
+          });
+          if (jsonResponse.length) {
+            playerInfo.push(jsonResponse[0]);
+          }
         }
-        const data = JSON.parse(JSON.stringify(player.data));
-        const jsonResponse: [Player] = data.map((item: DynamoPlayer) => {
-          return {
-            injury_status: item.injury_status.S,
-            status: item.status.S,
-            team: item.team.S,
-            playerId: item.playerId.S,
-            full_name: item.full_name.S,
-            espn_id: item.espn_id.S,
-            years_exp: item.years_exp.S,
-            position: item.position.S,
-            age: item.age.S,
-          };
-        });
-        if (jsonResponse.length) {
-          playerInfo.push(jsonResponse[0]);
-        }
+        setPlayerInfoLoaded(true);
+        setLoading(false);
+        setAllPlayers(playerInfo);
       }
-      setPlayerInfoLoaded(true);
-      setLoading(false);
-      setAllPlayers(playerInfo);
     };
+
     getLeagueInfo();
-  }, []);
+  }, [players]);
 
   async function getRecommendation() {
     if (!leagueRosters) {
@@ -108,7 +118,7 @@ const LeagueRosterPage = () => {
   return (
     <Suspense fallback={<Loading />}>
       {!recLoading && (
-        <div className="text-center">
+        <div className="text-center flex flex-col items-center">
           {loading && <div> Loading player information... </div>}
           {playerInfoLoaded && <RosterDisplay players={allPlayers} />}
           {playerInfoLoaded && !recLoading && (
@@ -121,6 +131,7 @@ const LeagueRosterPage = () => {
               Recommend Me Trades
             </Button>
           )}
+          <BackButton />
         </div>
       )}
 

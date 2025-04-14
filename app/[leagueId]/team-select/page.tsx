@@ -8,6 +8,7 @@ import TeamDisplay from '../../components/TeamDisplay/TeamDisplay';
 import { useStore } from '../../store/useStore';
 import { fetchLeagueUser } from '../../server-actions/fetchLeagueUser';
 import { fetchLeagueRosters } from '../../server-actions/fetchLeagueRosters';
+import BackButton from '../../components/Button/BackButton';
 
 const TeamSelectPage = () => {
   const router = useRouter();
@@ -84,6 +85,7 @@ const TeamSelectPage = () => {
           leagueUsers.map((user) => (
             <TeamDisplay user={user} key={user.user_id} className="py-2" />
           ))}
+        <BackButton />
       </div>
     </div>
   );
