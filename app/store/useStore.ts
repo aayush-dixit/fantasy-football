@@ -16,24 +16,17 @@ interface AppState {
   resetLeagueUsers: () => void;
 }
 
-export const useStore = create<AppState>()(
-  devtools(
-    persist(
-      (set) => ({
-        data: null,
-        setData: (data) => set({ data }),
-        resetData: () => set({ data: null }),
-        leagueData: null,
-        setLeagueData: (leagueData) => set({ leagueData }),
-        resetLeagueData: () => set({ leagueData: null }),
-        leagueRosters: null,
-        setLeagueRosters: (leagueRosters) => set({ leagueRosters }),
-        resetLeagueRosters: () => set({ leagueRosters: null }),
-        leagueUsers: null,
-        setLeagueUsers: (leagueUsers) => set({ leagueUsers }),
-        resetLeagueUsers: () => set({ leagueUsers: null }),
-      }),
-      { name: 'rosterStore' }
-    )
-  )
-);
+export const useStore = create<AppState>((set) => ({
+  data: null,
+  setData: (data) => set({ data }),
+  resetData: () => set({ data: null }),
+  leagueData: null,
+  setLeagueData: (leagueData) => set({ leagueData }),
+  resetLeagueData: () => set({ leagueData: null }),
+  leagueRosters: null,
+  setLeagueRosters: (leagueRosters) => set({ leagueRosters }),
+  resetLeagueRosters: () => set({ leagueRosters: null }),
+  leagueUsers: null,
+  setLeagueUsers: (leagueUsers) => set({ leagueUsers }),
+  resetLeagueUsers: () => set({ leagueUsers: null }),
+}));

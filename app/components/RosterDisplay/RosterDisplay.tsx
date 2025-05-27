@@ -23,6 +23,9 @@ const RosterDisplay: React.FC<RosterDisplayProps> = ({ players }) => {
     return;
   }
 
+  const className = "flex flex-col p-2 border-b flex justify-center items-center h-[150px] hover:bg-slate-100"
+
+
   return (
     <div className="h-[1000px] overflow-y-scroll">
       <h1 className="text-2xl font-bold">Your Roster</h1>
@@ -32,7 +35,7 @@ const RosterDisplay: React.FC<RosterDisplayProps> = ({ players }) => {
           {qbs.map((qb: Player, index: number) => (
             <div
               key={index}
-              className="flex flex-col p-2 border-b flex justify-center items-center h-[150px]"
+              className={className}
             >
               <Image
                 src={`https://sleepercdn.com/content/nfl/players/thumb/${qb.playerId}.jpg`}
@@ -52,7 +55,7 @@ const RosterDisplay: React.FC<RosterDisplayProps> = ({ players }) => {
           {rbs.map((rb: Player, index: number) => (
             <div
               key={index}
-              className="flex flex-col p-2 border-b flex justify-center items-center h-[150px]"
+              className={className}
             >
               <Image
                 src={`https://sleepercdn.com/content/nfl/players/thumb/${rb.playerId}.jpg`}
@@ -72,7 +75,7 @@ const RosterDisplay: React.FC<RosterDisplayProps> = ({ players }) => {
           {wrs.map((wr: Player, index: number) => (
             <div
               key={index}
-              className="flex flex-col p-2 border-b flex justify-center items-center h-[150px]"
+              className={className}
             >
               <Image
                 src={`https://sleepercdn.com/content/nfl/players/thumb/${wr.playerId}.jpg`}
@@ -92,7 +95,7 @@ const RosterDisplay: React.FC<RosterDisplayProps> = ({ players }) => {
           {tes.map((te: Player, index: number) => (
             <div
               key={index}
-              className="flex flex-col p-2 border-b flex justify-center items-center h-[150px]"
+              className={className}
             >
               <Image
                 src={`https://sleepercdn.com/content/nfl/players/thumb/${te.playerId}.jpg`}
@@ -112,7 +115,7 @@ const RosterDisplay: React.FC<RosterDisplayProps> = ({ players }) => {
           {kickers.map((k: Player, index: number) => (
             <div
               key={index}
-              className="flex flex-col p-2 border-b flex justify-center items-center h-[150px]"
+              className={className}
             >
               <Image
                 src={`https://sleepercdn.com/content/nfl/players/thumb/${k.playerId}.jpg`}

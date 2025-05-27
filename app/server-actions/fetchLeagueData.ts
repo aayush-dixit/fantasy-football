@@ -4,20 +4,20 @@ import { LeagueSettings } from '../types/types';
 
 export type fetchLeagueDataSuccessResponse =
   | {
-      success: true;
-      data: LeagueSettings;
-    }
+    success: true;
+    data: LeagueSettings;
+  }
   | {
-      success: false;
-      errors: any;
-    };
+    success: false;
+    errors: any;
+  };
 
 export async function fetchLeagueData(
   leagueId: string
 ): Promise<fetchLeagueDataSuccessResponse> {
   try {
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/fetchLeagueData?leagueIdInput=${leagueId}`,
+      `https://api.sleeper.app/v1/league/${leagueId}`,
       { cache: 'force-cache' }
     );
     if (response.status != 200) {

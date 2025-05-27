@@ -15,7 +15,6 @@ const TeamSelectPage = () => {
   const pathName = usePathname();
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(false);
   const { setLeagueRosters, setLeagueUsers, leagueUsers } = useStore();
 
   const leagueIdInput = pathName.split('/')[1];
@@ -34,13 +33,11 @@ const TeamSelectPage = () => {
       }
       const owners = rosters.data.map((team: Team) => team.owner_id);
 
-      setError(false);
       setLoading(false);
       setLeagueRosters(rosters.data);
       await fetchLeagueUsers(owners);
     } catch (err) {
       setLoading(false);
-      setError(true);
       console.error(err);
     }
   };
@@ -59,10 +56,8 @@ const TeamSelectPage = () => {
       );
       setLeagueUsers(results);
       setLoading(false);
-      setError(false);
     } catch (err) {
       console.error('Error fetching league users:', err);
-      setError(true);
       setLoading(false);
     }
   };

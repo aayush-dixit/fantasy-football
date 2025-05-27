@@ -4,14 +4,12 @@ import React, { Suspense, useEffect, useMemo } from 'react';
 import { useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import {
-  ClaudeRecommendation,
   DynamoPlayer,
   Player,
   Team,
 } from '../../types/types';
 import RosterDisplay from '../../components/RosterDisplay/RosterDisplay';
 import { useStore } from '../../store/useStore';
-import { fetchPlayerById } from '../../server-actions/fetchPlayerById';
 import {
   mapLeaguePlayers,
   filteredPlayer,
@@ -22,6 +20,7 @@ import { useDisclosure } from '@mantine/hooks';
 import RecommendationModal from '../../components/Modal/RecommendationModal';
 import Loading from '../loading';
 import BackButton from '../../components/Button/BackButton';
+import { fetchPlayersById } from '../../server-actions/fetchMultiplePlayersById';
 
 const LeagueRosterPage = () => {
   const searchParams = useSearchParams();
@@ -61,36 +60,29 @@ const LeagueRosterPage = () => {
     const getLeagueInfo = async () => {
       if (allPlayers.length == 0) {
         setLoading(true);
-        const playerPromises = players.map(
-          async (player) => await fetchPlayerById(player)
-        );
-        const fetchedPlayers = await Promise.all(playerPromises);
-
-        for (const player of fetchedPlayers) {
-          if (!player.success) {
-            throw new Error('Failed to fetch player data');
-          }
-          const data = JSON.parse(JSON.stringify(player.data));
-          const jsonResponse: [Player] = data.map((item: DynamoPlayer) => {
-            return {
-              injury_status: item.injury_status.S,
-              status: item.status.S,
-              team: item.team.S,
-              playerId: item.playerId.S,
-              full_name: item.full_name.S,
-              espn_id: item.espn_id.S,
-              years_exp: item.years_exp.S,
-              position: item.position.S,
-              age: item.age.S,
-            };
-          });
-          if (jsonResponse.length) {
-            playerInfo.push(jsonResponse[0]);
-          }
+        const fetchPlayersResult = await fetchPlayersById(players);
+        if (!fetchPlayersResult.success) {
+          throw new Error('Failed to fetch player data');
         }
+        const playerData = fetchPlayersResult.data;
+        console.log('server action result: ', fetchPlayersResult);
+        const jsonResponse: Player[] = playerData.map((item: DynamoPlayer) => {
+          return {
+            injury_status: item.injury_status.S,
+            status: item.status.S,
+            team: item.team.S,
+            playerId: item.playerId.S,
+            full_name: item.full_name.S,
+            espn_id: item.espn_id.S,
+            years_exp: item.years_exp.S,
+            position: item.position.S,
+            age: item.age.S,
+          };
+        });
+
         setPlayerInfoLoaded(true);
         setLoading(false);
-        setAllPlayers(playerInfo);
+        setAllPlayers(jsonResponse);
       }
     };
 

@@ -11,6 +11,7 @@ export async function getAIRecommendation(
   userTeam: Record<string, filteredPlayer[]>,
   otherTeams: Record<string, filteredPlayer[]>
 ) {
+  const TOKEN_LIMIT = 4000;
   const samplePrompt = tradeRecommendationPrompt({}, {});
   const playerStatistics = await getPlayerStatistics();
   if (!playerStatistics.success) {
@@ -18,13 +19,13 @@ export async function getAIRecommendation(
   }
   let combinedUserTeam: Record<string, CombinedPlayer[]> = {};
   let combinedOtherTeams: Record<string, CombinedPlayer[]> = {};
+  const playerStatsMap = new Map(
+    Object.values(playerStatistics.data).map(fcPlayer => [fcPlayer.player.sleeperId, fcPlayer])
+  );
   for (const key in userTeam) {
     combinedUserTeam[key] = userTeam[key]
       .map((player) => {
-        const matchingFantasyPlayer = Object.values(playerStatistics.data).find(
-          (fcPlayer) => fcPlayer.player.sleeperId === player.id
-        );
-
+        const matchingFantasyPlayer = playerStatsMap.get(player.id);
         if (matchingFantasyPlayer) {
           return { ...player, ...matchingFantasyPlayer };
         }
@@ -56,8 +57,9 @@ export async function getAIRecommendation(
 
   const chunks = splitObjectIntoChunksByTokenLimit(
     combinedOtherTeams,
-    4096 - JSON.stringify(combinedUserTeam).length - samplePrompt.length
+    TOKEN_LIMIT - JSON.stringify(combinedUserTeam).length - samplePrompt.length
   );
+
   const allRecs: string[] = [];
   for (const chunk of chunks) {
     const rec = await callAnthropic(

@@ -1,7 +1,7 @@
 'use server';
 
-import { Team } from '../types/types';
-import { fetchPlayerById } from './fetchPlayerById';
+import { DynamoPlayer, Team } from '../types/types';
+import { fetchPlayersById } from './fetchMultiplePlayersById';
 
 export type filteredPlayer = {
   name: string;
@@ -14,34 +14,14 @@ export async function mapLeaguePlayers(
 ): Promise<Record<string, filteredPlayer[]>> {
   const playersMap: Record<string, filteredPlayer[]> = {};
   for (const team of leagueRosters) {
-    const players: {
-      name: string;
-      age: string;
-      position: string;
-      id: string;
-    }[] = [];
     const playersList = team.players;
-    const playerPromises = playersList.map(
-      async (player) => await fetchPlayerById(player)
-    );
-    const fetchedPlayers = await Promise.all(playerPromises);
+    const fetchedPlayersResult = await fetchPlayersById(playersList);
 
-    for (const fetchedPlayer of fetchedPlayers) {
-      if (
-        fetchedPlayer.success &&
-        Array.isArray(fetchedPlayer.data) &&
-        fetchedPlayer.data.length
-      ) {
-        players.push({
-          name: fetchedPlayer.data[0].full_name.S,
-          age: fetchedPlayer.data[0].age.S,
-          position: fetchedPlayer.data[0].position.S,
-          id: fetchedPlayer.data[0].playerId.S,
-        });
-      }
+    if (fetchedPlayersResult.success) {
+      playersMap[team.owner_id] = fetchedPlayersResult.data.map((player: DynamoPlayer) => ({
+        name: player.full_name.S, age: player.age.S, position: player.position.S, id: player.playerId.S
+      }));
     }
-
-    playersMap[team.owner_id] = players;
   }
   return playersMap;
 }
