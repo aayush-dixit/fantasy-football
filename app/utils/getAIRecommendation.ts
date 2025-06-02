@@ -64,9 +64,14 @@ export async function getAIRecommendation(
   );
 
   const allRecs: string[] = [];
+  const baseUrl =
+    process.env.NODE_ENV === 'development'
+      ? 'http://localhost:3000'
+      : `https://fantasy-football-assistant.vercel.app`;
+
   await Promise.all(
     chunks.map(async (chunk) => {
-      const res = await fetch('http://localhost:3000/api/openai', {
+      const res = await fetch(`${baseUrl}/api/openai`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
