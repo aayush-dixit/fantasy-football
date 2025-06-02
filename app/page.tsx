@@ -1,7 +1,6 @@
 'use client';
 
-import React from 'react';
-import Button from './components/Button/FetchButton';
+import React, { useEffect } from 'react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useStore } from './store/useStore';
@@ -14,7 +13,11 @@ const LeagueInfoPage = () => {
 
   const [loading, setLoading] = useState(false);
   const [leagueIdInput, setLeagueIdInput] = useState('');
-  const { setLeagueData } = useStore();
+  const { setLeagueData, resetStore } = useStore();
+
+  useEffect(() => {
+    resetStore();
+  }, []);
 
   const handleClick = async () => {
     setLoading(true);

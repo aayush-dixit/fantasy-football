@@ -1,27 +1,21 @@
 import React from 'react';
 import { Player } from '../../types/types';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { useStore } from '../../store/useStore';
 
 interface RosterDisplayProps {
   players: Player[];
 }
 
 const RosterDisplay: React.FC<RosterDisplayProps> = ({ players }) => {
-  const router = useRouter();
+  if (players.length == 0) {
+    return null;
+  }
 
   const qbs = players.filter((player: Player) => player.position === 'QB');
   const rbs = players.filter((player: Player) => player.position === 'RB');
   const wrs = players.filter((player: Player) => player.position === 'WR');
   const tes = players.filter((player: Player) => player.position === 'TE');
   const kickers = players.filter((player: Player) => player.position === 'K');
-
-  const { leagueRosters } = useStore();
-  if (leagueRosters == null) {
-    router.push('/');
-    return;
-  }
 
   const className = "flex flex-col p-2 border-b flex justify-center items-center h-[150px] hover:bg-slate-100"
 

@@ -2,15 +2,15 @@
 
 import Anthropic from '@anthropic-ai/sdk';
 
+import AnthropicClient from '../utils/getAnthropicClient';
+
 export async function callAnthropic(prompt: string) {
-  const client = new Anthropic({
-    apiKey: process.env.ANTHROPIC_API_KEY!,
-  });
+  const client = AnthropicClient.getInstance();
 
   try {
     const response = await client.messages.create({
-      model: 'claude-3-5-sonnet-20240620',
-      max_tokens: 4096,
+      model: 'claude-3-5-sonnet-20241022',
+      max_tokens: 8192,
       messages: [
         { role: 'user', content: prompt },
         { role: 'assistant', content: 'Here is the suggestion:' },

@@ -1,5 +1,3 @@
-'use server';
-
 import { User } from '../types/types';
 
 export type fetchLeagueUserResponse =

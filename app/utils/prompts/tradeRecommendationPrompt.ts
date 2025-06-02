@@ -4,29 +4,46 @@ export function tradeRecommendationPrompt<T>(
   userTeam: Record<string, filteredPlayer[]>,
   chunk: Record<string, T>
 ) {
-  return `For each team here, please recommend a trade with up to 3 players on each side that would make sense for this user's team. Only return trades if a trade can be made where the difference between the value on the user sides and the other team of the trade is less than 500: ${JSON.stringify(userTeam)}. Other teams: ${JSON.stringify(chunk)}. In the response only return the following JSON object:
-    {
-      "userTeam": {
-        "sends": [
-          {
-          "playerName": [playerName],
-          "position": [position],
-          "value": [value],
-          "playerId": [playerId],
-        }, ...
-        ]
+  return `For this user's team, recommend exactly 3 trades with 3 different teams, with up to 3 players on each side. Only include trades where the difference in value between the two sides is less than 400, and pick the 3 with the lowest value difference between them and the user.
+
+User's team:
+${JSON.stringify(userTeam)}
+
+Other teams:
+${JSON.stringify(chunk)}
+
+Respond only with a JSON array of 3 trade objects. Each object in the array must have the following structure:
+
+    {"suggestions":
+      [
+        {
+          "userTeam": {
+            "sends": [
+              {
+              "playerName": [playerName],
+              "position": [position],
+              "value": [value],
+              "playerId": [playerId],
+            }, ...
+            ],
+          },
+          "otherTeam": {
+            "teamId": [id],
+            "sends": [
+              {
+              "playerName": [playerName],
+              "position": [position],
+              "value": [value],
+              "playerId": [playerId],
+            }, ...
+            ],
+        },
+        "rationale": [rationale],
       },
-      "otherTeam": {
-        "teamId": [id],
-        "sends": [
-          {
-          "playerName": [playerName],
-          "position": [position],
-          "value": [value],
-          "playerId": [playerId],
-        }, ...
-        ]
-      },
-    }  
-    `;
+        ...
+      ]
+    }
+  }
+
+Do not include any explanation or text — only return the array of 3 trade objects in valid JSON format.`;
 }

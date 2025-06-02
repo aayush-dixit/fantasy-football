@@ -1,10 +1,7 @@
 import { create } from 'zustand';
+import { User, Team, LeagueSettings, Player } from '../types/types';
 import { devtools, persist } from 'zustand/middleware';
-import { User, Team, LeagueSettings } from '../types/types';
 interface AppState {
-  data: string | null;
-  setData: (data: string) => void;
-  resetData: () => void;
   leagueData: LeagueSettings | null;
   setLeagueData: (data: LeagueSettings) => void;
   resetLeagueData: () => void;
@@ -14,19 +11,32 @@ interface AppState {
   leagueUsers: User[] | null;
   setLeagueUsers: (data: User[]) => void;
   resetLeagueUsers: () => void;
+  userTeam: Player[] | null;
+  setUserTeam: (data: Player[]) => void;
+  resetStore: () => void;
 }
 
-export const useStore = create<AppState>((set) => ({
-  data: null,
-  setData: (data) => set({ data }),
-  resetData: () => set({ data: null }),
+const initialState = {
   leagueData: null,
-  setLeagueData: (leagueData) => set({ leagueData }),
-  resetLeagueData: () => set({ leagueData: null }),
   leagueRosters: null,
-  setLeagueRosters: (leagueRosters) => set({ leagueRosters }),
-  resetLeagueRosters: () => set({ leagueRosters: null }),
   leagueUsers: null,
-  setLeagueUsers: (leagueUsers) => set({ leagueUsers }),
-  resetLeagueUsers: () => set({ leagueUsers: null }),
-}));
+  userTeam: null,
+};
+
+export const useStore = create<AppState>()(
+  devtools(
+    persist(
+      (set) => ({
+        ...initialState,
+        setLeagueData: (leagueData) => set({ leagueData }),
+        resetLeagueData: () => set({ leagueData: null }),
+        setLeagueRosters: (leagueRosters) => set({ leagueRosters }),
+        resetLeagueRosters: () => set({ leagueRosters: null }),
+        setLeagueUsers: (leagueUsers) => set({ leagueUsers }),
+        resetLeagueUsers: () => set({ leagueUsers: null }),
+        resetStore: () => set(initialState),
+        setUserTeam: (userTeam) => set({ userTeam }),
+      }),
+      { name: 'rosterStore' }
+    ))
+);

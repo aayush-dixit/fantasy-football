@@ -25,23 +25,24 @@ import { fetchPlayersById } from '../../server-actions/fetchMultiplePlayersById'
 const LeagueRosterPage = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const playerInfo: Player[] = [];
   const [loading, setLoading] = useState(false);
-  const [playerInfoLoaded, setPlayerInfoLoaded] = useState(false);
-  const [allPlayers, setAllPlayers] = useState<Player[]>([]);
   const [opened, { open, close }] = useDisclosure(false);
   const [recommendation, setRecommendation] = useState<string | null>('');
   const [recLoading, setRecLoading] = useState(false);
-
+  const { userTeam: allPlayers, setUserTeam, leagueRosters } = useStore();
   const userId = searchParams.get('userId');
+  const [playerInfoLoaded, setPlayerInfoLoaded] = useState(allPlayers != null ? true : false);
 
-  const { leagueRosters } = useStore();
   useEffect(() => {
     if (!leagueRosters) {
       router.push('/');
       return;
     }
   }, []);
+
+  useEffect(() => {
+    setPlayerInfoLoaded(!!allPlayers)
+  }, [allPlayers])
 
   const userTeam: Team | undefined = leagueRosters?.find(
     (team: Team) => team.owner_id === userId
@@ -58,14 +59,13 @@ const LeagueRosterPage = () => {
   let playersMap: Record<string, filteredPlayer[]> = {};
   useEffect(() => {
     const getLeagueInfo = async () => {
-      if (allPlayers.length == 0) {
+      if (!allPlayers) {
         setLoading(true);
         const fetchPlayersResult = await fetchPlayersById(players);
         if (!fetchPlayersResult.success) {
           throw new Error('Failed to fetch player data');
         }
         const playerData = fetchPlayersResult.data;
-        console.log('server action result: ', fetchPlayersResult);
         const jsonResponse: Player[] = playerData.map((item: DynamoPlayer) => {
           return {
             injury_status: item.injury_status.S,
@@ -82,12 +82,12 @@ const LeagueRosterPage = () => {
 
         setPlayerInfoLoaded(true);
         setLoading(false);
-        setAllPlayers(jsonResponse);
+        setUserTeam(jsonResponse);
       }
     };
 
     getLeagueInfo();
-  }, [players]);
+  }, []);
 
   async function getRecommendation() {
     if (!leagueRosters) {
@@ -112,7 +112,7 @@ const LeagueRosterPage = () => {
       {!recLoading && (
         <div className="text-center flex flex-col items-center">
           {loading && <div> Loading player information... </div>}
-          {playerInfoLoaded && <RosterDisplay players={allPlayers} />}
+          {allPlayers && <RosterDisplay players={allPlayers} />}
           {playerInfoLoaded && !recLoading && (
             <Button
               variant="filled"

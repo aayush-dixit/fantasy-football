@@ -6,7 +6,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import { Team, User } from '../../types/types';
 import TeamDisplay from '../../components/TeamDisplay/TeamDisplay';
 import { useStore } from '../../store/useStore';
-import { fetchLeagueUser } from '../../server-actions/fetchLeagueUser';
+import { fetchLeagueUser } from '../../utils/fetchLeagueUser';
 import { fetchLeagueRosters } from '../../server-actions/fetchLeagueRosters';
 import BackButton from '../../components/Button/BackButton';
 
