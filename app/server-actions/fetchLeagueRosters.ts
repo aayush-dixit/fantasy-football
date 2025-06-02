@@ -4,13 +4,13 @@ import { Team } from '../types/types';
 
 export type fetchLeagueRostersResponse =
   | {
-    success: true;
-    data: Team[];
-  }
+      success: true;
+      data: Team[];
+    }
   | {
-    success: false;
-    errors: any;
-  };
+      success: false;
+      errors: any;
+    };
 
 export async function fetchLeagueRosters(
   leagueId: string

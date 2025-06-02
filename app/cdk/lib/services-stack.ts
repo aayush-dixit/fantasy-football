@@ -3,8 +3,8 @@ import * as lambda from 'aws-cdk-lib/aws-lambda';
 import * as apigateway from 'aws-cdk-lib/aws-apigateway';
 import { Construct } from 'constructs';
 import * as path from 'path';
-import * as events from "aws-cdk-lib/aws-events";
-import * as targets from "aws-cdk-lib/aws-events-targets";
+import * as events from 'aws-cdk-lib/aws-events';
+import * as targets from 'aws-cdk-lib/aws-events-targets';
 import * as dotenv from 'dotenv';
 import { Table } from 'aws-cdk-lib/aws-dynamodb';
 import { Duration } from 'aws-cdk-lib';
@@ -58,21 +58,17 @@ export class ServicesStack extends cdk.Stack {
       }
     );
 
-    const updateDBLambda = new lambda.Function(
-      this,
-      'updateDBFunction',
-      {
-        runtime: lambda.Runtime.NODEJS_20_X,
-        handler: 'lambdas/updateDB.handler',
-        code: lambda.Code.fromAsset(path.join(__dirname, '../dist')),
-        environment: {
-          API_GATEWAY_URL: process.env.API_GATEWAY_URL!,
-          PLAYER_TABLE: table.tableName,
-        },
-        memorySize: 1024,
-        timeout: Duration.minutes(15),
-      }
-    )
+    const updateDBLambda = new lambda.Function(this, 'updateDBFunction', {
+      runtime: lambda.Runtime.NODEJS_20_X,
+      handler: 'lambdas/updateDB.handler',
+      code: lambda.Code.fromAsset(path.join(__dirname, '../dist')),
+      environment: {
+        API_GATEWAY_URL: process.env.API_GATEWAY_URL!,
+        PLAYER_TABLE: table.tableName,
+      },
+      memorySize: 1024,
+      timeout: Duration.minutes(15),
+    });
 
     table.grantReadData(queryPlayerByIdLambda);
     table.grantReadData(queryBatchPlayersLambda);
@@ -82,9 +78,11 @@ export class ServicesStack extends cdk.Stack {
       restApiName: 'FantasyFootballApi',
     });
 
-    new events.Rule(this, "WeeklyPlayerUpdateRule", {
+    new events.Rule(this, 'WeeklyPlayerUpdateRule', {
       schedule: events.Schedule.cron({
-        minute: "0", hour: "5", weekDay: "TUE"
+        minute: '0',
+        hour: '5',
+        weekDay: 'TUE',
       }),
       targets: [new targets.LambdaFunction(updateDBLambda)],
     });

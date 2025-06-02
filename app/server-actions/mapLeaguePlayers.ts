@@ -18,9 +18,14 @@ export async function mapLeaguePlayers(
     const fetchedPlayersResult = await fetchPlayersById(playersList);
 
     if (fetchedPlayersResult.success) {
-      playersMap[team.owner_id] = fetchedPlayersResult.data.map((player: DynamoPlayer) => ({
-        name: player.full_name.S, age: player.age.S, position: player.position.S, id: player.playerId.S
-      }));
+      playersMap[team.owner_id] = fetchedPlayersResult.data.map(
+        (player: DynamoPlayer) => ({
+          name: player.full_name.S,
+          age: player.age.S,
+          position: player.position.S,
+          id: player.playerId.S,
+        })
+      );
     }
   }
   return playersMap;

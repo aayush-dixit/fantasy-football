@@ -11,7 +11,6 @@ export async function getAIRecommendation(
   userTeam: Record<string, filteredPlayer[]>,
   otherTeams: Record<string, filteredPlayer[]>
 ) {
-
   const TOKEN_LIMIT = 9999999;
   const samplePrompt = tradeRecommendationPrompt({}, {});
   const playerStatistics = await getPlayerStatistics();
@@ -21,7 +20,10 @@ export async function getAIRecommendation(
   let combinedUserTeam: Record<string, CombinedPlayer[]> = {};
   let combinedOtherTeams: Record<string, CombinedPlayer[]> = {};
   const playerStatsMap = new Map(
-    Object.values(playerStatistics.data).map(fcPlayer => [fcPlayer.player.sleeperId, fcPlayer])
+    Object.values(playerStatistics.data).map((fcPlayer) => [
+      fcPlayer.player.sleeperId,
+      fcPlayer,
+    ])
   );
   for (const key in userTeam) {
     combinedUserTeam[key] = userTeam[key]
@@ -72,7 +74,7 @@ export async function getAIRecommendation(
         }),
       });
       const rec = await res.json();
-      allRecs.push(rec.result)
+      allRecs.push(rec.result);
     })
   );
 

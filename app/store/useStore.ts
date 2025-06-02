@@ -38,5 +38,6 @@ export const useStore = create<AppState>()(
         setUserTeam: (userTeam) => set({ userTeam }),
       }),
       { name: 'rosterStore' }
-    ))
+    )
+  )
 );

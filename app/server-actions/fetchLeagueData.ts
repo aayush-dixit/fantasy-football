@@ -4,13 +4,13 @@ import { LeagueSettings } from '../types/types';
 
 export type fetchLeagueDataSuccessResponse =
   | {
-    success: true;
-    data: LeagueSettings;
-  }
+      success: true;
+      data: LeagueSettings;
+    }
   | {
-    success: false;
-    errors: any;
-  };
+      success: false;
+      errors: any;
+    };
 
 export async function fetchLeagueData(
   leagueId: string
